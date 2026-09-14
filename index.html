@@ -65,6 +65,32 @@
         <button class="primary" type="submit">Add card</button>
       </form>
     </section>
+
+    <section class="manage management-panel" aria-labelledby="manage-heading">
+      <h2 id="manage-heading">Manage cards and decks</h2>
+      <div class="management-grid">
+        <form id="edit-card-form">
+          <h3>Edit current card</h3>
+          <input id="edit-question-input" type="text" placeholder="Question" aria-label="Edit question" required>
+          <input id="edit-answer-input" type="text" placeholder="Answer" aria-label="Edit answer" required>
+          <input id="edit-question-hint-input" type="text" placeholder="Question hint (optional)" aria-label="Edit question hint">
+          <textarea id="edit-answer-note-input" rows="2" placeholder="Answer note in Markdown (optional)" aria-label="Edit answer note"></textarea>
+          <div class="management-actions">
+            <button class="primary" type="submit">Save card</button>
+            <button id="delete-card-btn" class="danger" type="button">Delete card</button>
+          </div>
+        </form>
+        <form id="edit-deck-form">
+          <h3>Rename current deck</h3>
+          <input id="deck-name-input" type="text" placeholder="Deck name" aria-label="Deck name" required>
+          <div class="management-actions">
+            <button class="primary" type="submit">Rename deck</button>
+            <button id="delete-deck-btn" class="danger" type="button">Delete deck</button>
+          </div>
+          <p class="muted management-help">Deleting a deck also deletes its cards.</p>
+        </form>
+      </div>
+    </section>
   </main>
   <script src="script.js"></script>
 </body>

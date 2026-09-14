@@ -33,6 +33,15 @@
 		answerInput: document.querySelector('#answer-input'),
 		questionHintInput: document.querySelector('#question-hint-input'),
 		answerNoteInput: document.querySelector('#answer-note-input'),
+		editCardForm: document.querySelector('#edit-card-form'),
+		editQuestionInput: document.querySelector('#edit-question-input'),
+		editAnswerInput: document.querySelector('#edit-answer-input'),
+		editQuestionHintInput: document.querySelector('#edit-question-hint-input'),
+		editAnswerNoteInput: document.querySelector('#edit-answer-note-input'),
+		deleteCard: document.querySelector('#delete-card-btn'),
+		editDeckForm: document.querySelector('#edit-deck-form'),
+		deckNameInput: document.querySelector('#deck-name-input'),
+		deleteDeck: document.querySelector('#delete-deck-btn'),
 	};
 
 	const storageKeys = { cards: 'flashcard-cards', levels: 'flashcard-levels' };
@@ -82,6 +91,24 @@
 		return state.levels.get(cardKey(card, state.allCards.indexOf(card))) ?? (Number(card.know_level) || 0);
 	}
 
+	function getCurrentCard() {
+		return state.cards[state.index] ?? null;
+	}
+
+	function populateManagementFields() {
+		const card = getCurrentCard();
+		const { question, answer } = card ? getCardText(card) : { question: '', answer: '' };
+		elements.editQuestionInput.value = question;
+		elements.editAnswerInput.value = answer;
+		elements.editQuestionHintInput.value = card?.question_hint ?? '';
+		elements.editAnswerNoteInput.value = card?.answer_note ?? '';
+		elements.deckNameInput.value = state.deck === 'all' ? '' : state.deck;
+		[elements.editQuestionInput, elements.editAnswerInput, elements.editQuestionHintInput, elements.editAnswerNoteInput, elements.deleteCard]
+			.forEach((element) => { if (element) element.disabled = !card; });
+		[elements.deckNameInput, elements.editDeckForm?.querySelector('button[type="submit"]'), elements.deleteDeck]
+			.forEach((element) => { if (element) element.disabled = state.deck === 'all' || !state.allCards.some((item) => item.deck === state.deck); });
+	}
+
 	function updateDeckOptions() {
 		if (!elements.deckSelect) return;
 		const decks = [...new Set(state.allCards.map((card) => card.deck).filter(Boolean))];
@@ -99,6 +126,9 @@
 			const seedCards = match ? Function(`"use strict"; return (${match[1]})`)() : [];
 			const savedCards = readStorage(storageKeys.cards, null);
 			state.allCards = Array.isArray(savedCards) ? savedCards : seedCards;
+			state.allCards.forEach((card, index) => {
+				if (!card.id) card.id = `card-${index}-${card.question ?? card.front ?? card.term ?? ''}`;
+			});
 			const savedLevels = readStorage(storageKeys.levels, {});
 			state.levels = new Map(Object.entries(savedLevels).map(([key, value]) => [key, Math.max(0, Math.min(2, Number(value) || 0))]));
 			updateDeckOptions();
@@ -123,6 +153,7 @@
 			elements.label.textContent = 'No cards';
 			elements.content.textContent = 'Add a flashcard to begin.';
 			elements.hint.textContent = '';
+			populateManagementFields();
 			return;
 		}
 		const { question, answer } = getCardText(card);
@@ -137,6 +168,7 @@
 		elements.level.setAttribute('aria-valuetext', levelLabels[level]);
 		elements.card.classList.toggle('is-flipped', state.isFlipped);
 		elements.card.setAttribute('aria-label', `${state.isFlipped ? 'Answer' : 'Question'}: ${state.isFlipped ? answer : question}`);
+		populateManagementFields();
 	}
 
 	function goTo(index) {
@@ -221,6 +253,58 @@
 		applyDeck();
 		saveStorage();
 		elements.form.reset();
+		render();
+	});
+	elements.editCardForm?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		const card = getCurrentCard();
+		if (!card) return;
+		card.question = elements.editQuestionInput.value.trim();
+		card.answer = elements.editAnswerInput.value.trim();
+		card.question_hint = elements.editQuestionHintInput.value.trim();
+		card.answer_note = elements.editAnswerNoteInput.value.trim();
+		if (!card.question || !card.answer) return;
+		saveStorage();
+		render();
+	});
+	elements.deleteCard?.addEventListener('click', () => {
+		const card = getCurrentCard();
+		if (!card || !window.confirm('Delete this card?')) return;
+		const key = cardKey(card, state.allCards.indexOf(card));
+		state.levels.delete(key);
+		state.allCards = state.allCards.filter((item) => item !== card);
+		applyDeck();
+		saveStorage();
+		render();
+	});
+	elements.editDeckForm?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		if (state.deck === 'all') return;
+		const newName = elements.deckNameInput.value.trim();
+		if (!newName || newName === state.deck) return;
+		if (state.allCards.some((card) => card.deck === newName) || newName === 'all') {
+			window.alert('A deck with that name already exists.');
+			return;
+		}
+		state.allCards.forEach((card) => {
+			if (card.deck === state.deck) card.deck = newName;
+		});
+		state.deck = newName;
+		updateDeckOptions();
+		elements.deckSelect.value = state.deck;
+		applyDeck();
+		saveStorage();
+		render();
+	});
+	elements.deleteDeck?.addEventListener('click', () => {
+		if (state.deck === 'all' || !window.confirm(`Delete the "${state.deck}" deck and all its cards?`)) return;
+		const deletedCards = state.allCards.filter((card) => card.deck === state.deck);
+		deletedCards.forEach((card) => state.levels.delete(cardKey(card, state.allCards.indexOf(card))));
+		state.allCards = state.allCards.filter((card) => card.deck !== state.deck);
+		state.deck = 'all';
+		updateDeckOptions();
+		applyDeck();
+		saveStorage();
 		render();
 	});
 
