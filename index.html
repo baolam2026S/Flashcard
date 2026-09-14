@@ -8,7 +8,10 @@
 </head>
 <body>
   <header>
-    <div class="brand">Flashcard</div>
+    <div class="brand">
+      <img class="brand-logo" src="jessica.png" alt="hello you found me">
+      <span>Jessica's Flashcard</span>
+    </div>
     <nav aria-label="Main navigation">
       <button id="shuffle-btn" class="ghost" type="button">Shuffle</button>
       <button id="reset-btn" class="ghost" type="button">Reset progress</button>
@@ -17,7 +20,7 @@
 
   <main>
     <section class="intro">
-      <div><h1>Study smarter.</h1><p class="muted">Review your cards and build lasting knowledge.</p></div>
+      <div><h1>Developed by Trâm.</h1><p class="muted">Wait, Trâm can code??</p></div>
       <div class="toolbar">
         <label for="deck-select" class="muted">Deck</label>
         <select id="deck-select" aria-label="Choose a deck"><option value="all">All cards</option></select>
@@ -66,30 +69,32 @@
       </form>
     </section>
 
-    <section class="manage management-panel" aria-labelledby="manage-heading">
-      <h2 id="manage-heading">Manage cards and decks</h2>
-      <div class="management-grid">
-        <form id="edit-card-form">
-          <h3>Edit current card</h3>
-          <input id="edit-question-input" type="text" placeholder="Question" aria-label="Edit question" required>
-          <input id="edit-answer-input" type="text" placeholder="Answer" aria-label="Edit answer" required>
-          <input id="edit-question-hint-input" type="text" placeholder="Question hint (optional)" aria-label="Edit question hint">
-          <textarea id="edit-answer-note-input" rows="2" placeholder="Answer note in Markdown (optional)" aria-label="Edit answer note"></textarea>
-          <div class="management-actions">
-            <button class="primary" type="submit">Save card</button>
-            <button id="delete-card-btn" class="danger" type="button">Delete card</button>
-          </div>
-        </form>
-        <form id="edit-deck-form">
-          <h3>Rename current deck</h3>
-          <input id="deck-name-input" type="text" placeholder="Deck name" aria-label="Deck name" required>
-          <div class="management-actions">
-            <button class="primary" type="submit">Rename deck</button>
-            <button id="delete-deck-btn" class="danger" type="button">Delete deck</button>
-          </div>
-          <p class="muted management-help">Deleting a deck also deletes its cards.</p>
-        </form>
-      </div>
+    <section class="manage management-panel" aria-labelledby="manage-cards-heading">
+      <h2 id="manage-cards-heading">Manage cards</h2>
+      <form id="edit-card-form" class="card-form-layout">
+        <h3>Edit current card</h3>
+        <input id="edit-question-input" type="text" placeholder="Question" aria-label="Edit question" required>
+        <input id="edit-answer-input" type="text" placeholder="Answer" aria-label="Edit answer" required>
+        <input id="edit-question-hint-input" type="text" placeholder="Question hint (optional)" aria-label="Edit question hint">
+        <textarea id="edit-answer-note-input" rows="2" placeholder="Answer note in Markdown (optional)" aria-label="Edit answer note"></textarea>
+        <div class="management-actions">
+          <button class="primary" type="submit">Save card</button>
+          <button id="delete-card-btn" class="danger" type="button">Delete card</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="manage management-panel" aria-labelledby="manage-decks-heading">
+      <h2 id="manage-decks-heading">Manage decks</h2>
+      <form id="edit-deck-form" class="deck-management-form">
+        <h3>Rename current deck</h3>
+        <input id="deck-name-input" type="text" placeholder="Deck name" aria-label="Deck name" required>
+        <div class="management-actions">
+          <button class="primary" type="submit">Rename deck</button>
+          <button id="delete-deck-btn" class="danger" type="button">Delete deck</button>
+        </div>
+        <p class="muted management-help">Deleting a deck also deletes its cards.</p>
+      </form>
     </section>
   </main>
   <script src="script.js"></script>

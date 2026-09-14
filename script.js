@@ -5,6 +5,7 @@
 		index: 0,
 		isFlipped: false,
 		levels: new Map(),
+		decks: [],
 		deck: 'all',
 		touchStartX: null,
 	};
@@ -44,7 +45,7 @@
 		deleteDeck: document.querySelector('#delete-deck-btn'),
 	};
 
-	const storageKeys = { cards: 'flashcard-cards', levels: 'flashcard-levels' };
+	const storageKeys = { cards: 'flashcard-cards', levels: 'flashcard-levels', decks: 'flashcard-decks' };
 	const levelLabels = ["Don't know", 'Learning', 'Know'];
 
 	function readStorage(key, fallback) {
@@ -59,6 +60,7 @@
 	function saveStorage() {
 		localStorage.setItem(storageKeys.cards, JSON.stringify(state.allCards));
 		localStorage.setItem(storageKeys.levels, JSON.stringify(Object.fromEntries(state.levels)));
+		localStorage.setItem(storageKeys.decks, JSON.stringify(state.decks));
 	}
 
 	function cardKey(card, index) {
@@ -111,7 +113,8 @@
 
 	function updateDeckOptions() {
 		if (!elements.deckSelect) return;
-		const decks = [...new Set(state.allCards.map((card) => card.deck).filter(Boolean))];
+		const decks = [...new Set([...state.decks, ...state.allCards.map((card) => card.deck).filter(Boolean)])];
+		state.decks = decks;
 		elements.deckSelect.replaceChildren(new Option('All cards', 'all'));
 		decks.forEach((deck) => elements.deckSelect.append(new Option(deck, deck)));
 		elements.deckSelect.value = decks.includes(state.deck) ? state.deck : 'all';
@@ -131,7 +134,10 @@
 			});
 			const savedLevels = readStorage(storageKeys.levels, {});
 			state.levels = new Map(Object.entries(savedLevels).map(([key, value]) => [key, Math.max(0, Math.min(2, Number(value) || 0))]));
+			const savedDecks = readStorage(storageKeys.decks, null);
+			state.decks = Array.isArray(savedDecks) ? savedDecks.filter((deck) => typeof deck === 'string' && deck.trim()) : [];
 			updateDeckOptions();
+			saveStorage();
 			applyDeck();
 			render();
 		} catch (error) {
@@ -226,10 +232,17 @@
 	elements.addDeck?.addEventListener('click', () => {
 		const deck = window.prompt('Name your new deck:');
 		if (!deck?.trim()) return;
-		state.deck = deck.trim();
+		const deckName = deck.trim();
+		if (deckName.toLowerCase() === 'all' || state.decks.includes(deckName)) {
+			window.alert('A deck with that name already exists.');
+			return;
+		}
+		state.decks.push(deckName);
+		state.deck = deckName;
 		updateDeckOptions();
 		elements.deckSelect.value = state.deck;
 		applyDeck();
+		saveStorage();
 		render();
 	});
 	elements.form?.addEventListener('submit', (event) => {
@@ -289,6 +302,7 @@
 		state.allCards.forEach((card) => {
 			if (card.deck === state.deck) card.deck = newName;
 		});
+		state.decks = state.decks.map((deck) => deck === state.deck ? newName : deck);
 		state.deck = newName;
 		updateDeckOptions();
 		elements.deckSelect.value = state.deck;
@@ -301,6 +315,7 @@
 		const deletedCards = state.allCards.filter((card) => card.deck === state.deck);
 		deletedCards.forEach((card) => state.levels.delete(cardKey(card, state.allCards.indexOf(card))));
 		state.allCards = state.allCards.filter((card) => card.deck !== state.deck);
+		state.decks = state.decks.filter((deck) => deck !== state.deck);
 		state.deck = 'all';
 		updateDeckOptions();
 		applyDeck();

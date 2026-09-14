@@ -2,7 +2,7 @@
 	--bg: #f6f7fb;
 	--ink: #1f1e33;
 	--muted: #6b7280;
-	--primary: #4f46e5;
+	--primary: #f608aa;
 	--card: #fff;
 	--line: #e5e7eb;
 }
@@ -26,7 +26,8 @@ header {
 	border-bottom: 1px solid var(--line);
 }
 
-.brand { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 800; color: var(--primary); }
+.brand-logo { width: 34px; height: 34px; object-fit: contain; }
 nav { display: flex; gap: 10px; }
 button, select, input, textarea { font: inherit; }
 button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
@@ -61,12 +62,17 @@ select, input, textarea { padding: 11px 12px; border: 1px solid var(--line); bor
 .manage form { display: flex; flex-wrap: wrap; gap: 10px; }
 .manage input { flex: 1 1 220px; }
 .manage textarea { flex: 1 1 100%; resize: vertical; }
-.management-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.management-grid form { display: flex; flex-direction: column; gap: 10px; }
-.management-grid h3 { margin: 0 0 4px; font-size: 1rem; }
+.card-form-layout { display: flex; flex-wrap: wrap; gap: 10px; }
+.card-form-layout h3 { flex: 1 1 100%; margin: 0 0 4px; font-size: 1rem; }
+.card-form-layout input { flex: 1 1 220px; }
+.card-form-layout textarea { flex: 1 1 100%; resize: vertical; }
+.deck-management-form { display: flex; flex-direction: column; gap: 10px; }
+.deck-management-form input { flex: 0 0 auto; }
+.deck-management-form h3 { margin: 8px 0 0; font-size: 1rem; }
+.deck-management-form .management-actions { margin-top: 2px; }
 .management-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .danger { color: #b42318; background: #fff1f0; }
-.management-help { margin-top: 2px; font-size: .85rem; }
+.management-help { margin: 0; font-size: .85rem; }
 
 /* Card layout */
 .card {
@@ -169,5 +175,4 @@ select, input, textarea { padding: 11px 12px; border: 1px solid var(--line); bor
 	.toolbar { margin-top: 18px; }
 	.study { grid-template-columns: 1fr; }
 	.flashcard { min-height: 300px; }
-	.management-grid { grid-template-columns: 1fr; }
 }
