@@ -28,7 +28,7 @@ header {
 
 .brand { font-size: 1.25rem; font-weight: 800; color: var(--primary); }
 nav { display: flex; gap: 10px; }
-button, select, input { font: inherit; }
+button, select, input, textarea { font: inherit; }
 button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
 .ghost { background: transparent; color: var(--muted); }
 .primary { color: #fff; background: var(--primary); }
@@ -37,12 +37,17 @@ main { width: min(1100px, 92%); margin: 34px auto; }
 h1 { margin: 0 0 7px; font-size: clamp(1.7rem, 4vw, 2.5rem); }
 .muted { color: var(--muted); margin: 0; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-select, input { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
+select, input, textarea { padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); }
 .study { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
 .flashcard { min-height: 390px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 36px; text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 14px 35px #26324d0d; cursor: pointer; }
 .card-label { margin-bottom: 22px; color: var(--primary); font-size: .8rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 #card-content { max-width: 700px; font-size: clamp(1.7rem, 4vw, 2.8rem); line-height: 1.2; }
+.answer-note { max-width: 700px; margin-top: 18px; font-size: .95rem; line-height: 1.5; text-align: left; }
+.answer-note code { padding: 2px 5px; border-radius: 4px; background: var(--bg); font-family: monospace; }
 .hint { margin-top: 28px; color: var(--muted); font-size: .9rem; }
+.level-control { display: grid; width: min(100%, 360px); gap: 6px; margin-top: 22px; color: var(--muted); font-size: .8rem; text-align: left; }
+.level-control input { width: 100%; padding: 0; accent-color: var(--primary); cursor: pointer; }
+.level-label { color: var(--primary); font-weight: 700; text-align: center; }
 .card-actions { display: flex; justify-content: center; gap: 12px; margin-top: 18px; }
 .side-panel { padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
 .side-panel h2 { margin: 0 0 18px; font-size: 1rem; }
@@ -55,6 +60,7 @@ select, input { padding: 11px 12px; border: 1px solid var(--line); border-radius
 .manage { margin-top: 30px; padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
 .manage form { display: flex; flex-wrap: wrap; gap: 10px; }
 .manage input { flex: 1 1 220px; }
+.manage textarea { flex: 1 1 100%; resize: vertical; }
 
 /* Card layout */
 .card {

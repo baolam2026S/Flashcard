@@ -4,7 +4,7 @@
 		cards: [],
 		index: 0,
 		isFlipped: false,
-		known: new Set(),
+		levels: new Map(),
 		deck: 'all',
 		touchStartX: null,
 	};
@@ -13,7 +13,10 @@
 		card: document.querySelector('#flashcard'),
 		label: document.querySelector('#card-label'),
 		content: document.querySelector('#card-content'),
+		answerNote: document.querySelector('#answer-note'),
 		hint: document.querySelector('#card-hint'),
+		level: document.querySelector('#know-level'),
+		levelLabel: document.querySelector('#know-level-label'),
 		progressText: document.querySelector('#progress-text'),
 		progressBar: document.querySelector('#progress-bar'),
 		knownCount: document.querySelector('#known-count'),
@@ -28,9 +31,12 @@
 		form: document.querySelector('#card-form'),
 		questionInput: document.querySelector('#question-input'),
 		answerInput: document.querySelector('#answer-input'),
+		questionHintInput: document.querySelector('#question-hint-input'),
+		answerNoteInput: document.querySelector('#answer-note-input'),
 	};
 
-	const storageKeys = { cards: 'flashcard-cards', known: 'flashcard-known' };
+	const storageKeys = { cards: 'flashcard-cards', levels: 'flashcard-levels' };
+	const levelLabels = ["Don't know", 'Learning', 'Know'];
 
 	function readStorage(key, fallback) {
 		try {
@@ -43,7 +49,7 @@
 
 	function saveStorage() {
 		localStorage.setItem(storageKeys.cards, JSON.stringify(state.allCards));
-		localStorage.setItem(storageKeys.known, JSON.stringify([...state.known]));
+		localStorage.setItem(storageKeys.levels, JSON.stringify(Object.fromEntries(state.levels)));
 	}
 
 	function cardKey(card, index) {
@@ -55,6 +61,25 @@
 			question: card.question ?? card.front ?? card.term ?? '',
 			answer: card.answer ?? card.back ?? card.definition ?? '',
 		};
+	}
+
+	function markdownToHtml(markdown) {
+		const escaped = String(markdown ?? '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
+		return escaped
+			.replace(/`([^`]+)`/g, '<code>$1</code>')
+			.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+			.replace(/__([^_]+)__/g, '<strong>$1</strong>')
+			.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+			.replace(/_([^_]+)_/g, '<em>$1</em>')
+			.replace(/\n/g, '<br>');
+	}
+
+	function getLevel(card) {
+		return state.levels.get(cardKey(card, state.allCards.indexOf(card))) ?? (Number(card.know_level) || 0);
 	}
 
 	function updateDeckOptions() {
@@ -74,7 +99,8 @@
 			const seedCards = match ? Function(`"use strict"; return (${match[1]})`)() : [];
 			const savedCards = readStorage(storageKeys.cards, null);
 			state.allCards = Array.isArray(savedCards) ? savedCards : seedCards;
-			state.known = new Set(readStorage(storageKeys.known, []));
+			const savedLevels = readStorage(storageKeys.levels, {});
+			state.levels = new Map(Object.entries(savedLevels).map(([key, value]) => [key, Math.max(0, Math.min(2, Number(value) || 0))]));
 			updateDeckOptions();
 			applyDeck();
 			render();
@@ -87,11 +113,12 @@
 	function render() {
 		const card = state.cards[state.index];
 		const total = state.cards.length;
-		const reviewed = state.cards.filter((item, index) => state.known.has(cardKey(item, state.allCards.indexOf(item)))).length;
+		const reviewed = state.cards.filter((item) => getLevel(item) > 0).length;
+		const known = state.cards.filter((item) => getLevel(item) === 2).length;
 		if (elements.progressText) elements.progressText.textContent = `${reviewed} of ${total} cards reviewed`;
 		if (elements.progressBar) elements.progressBar.style.width = `${total ? (reviewed / total) * 100 : 0}%`;
-		if (elements.knownCount) elements.knownCount.textContent = reviewed;
-		if (elements.reviewCount) elements.reviewCount.textContent = total - reviewed;
+		if (elements.knownCount) elements.knownCount.textContent = known;
+		if (elements.reviewCount) elements.reviewCount.textContent = total - known;
 		if (!card) {
 			elements.label.textContent = 'No cards';
 			elements.content.textContent = 'Add a flashcard to begin.';
@@ -99,9 +126,15 @@
 			return;
 		}
 		const { question, answer } = getCardText(card);
-		elements.label.textContent = state.isFlipped ? 'Answer' : 'Question';
+		const level = getLevel(card);
+		elements.label.textContent = state.isFlipped ? 'Answer' : (card.question_hint || 'Question');
 		elements.content.textContent = state.isFlipped ? answer : question;
+		elements.answerNote.innerHTML = state.isFlipped && card.answer_note ? markdownToHtml(card.answer_note) : '';
+		elements.answerNote.hidden = !state.isFlipped || !card.answer_note;
 		elements.hint.textContent = state.isFlipped ? 'Click the card to show the question' : 'Click the card to reveal the answer';
+		elements.level.value = level;
+		elements.levelLabel.textContent = levelLabels[level];
+		elements.level.setAttribute('aria-valuetext', levelLabels[level]);
 		elements.card.classList.toggle('is-flipped', state.isFlipped);
 		elements.card.setAttribute('aria-label', `${state.isFlipped ? 'Answer' : 'Question'}: ${state.isFlipped ? answer : question}`);
 	}
@@ -131,10 +164,6 @@
 
 	function flip() {
 		if (!state.cards.length) return;
-		if (!state.isFlipped) {
-			state.known.add(cardKey(state.cards[state.index], state.allCards.indexOf(state.cards[state.index])));
-			saveStorage();
-		}
 		state.isFlipped = !state.isFlipped;
 		render();
 	}
@@ -145,10 +174,18 @@
 	elements.previous?.addEventListener('click', () => goTo(state.index - 1));
 	elements.shuffle?.addEventListener('click', shuffle);
 	elements.reset?.addEventListener('click', () => {
-		state.known.clear();
+		state.levels.clear();
 		saveStorage();
 		render();
 	});
+	elements.level?.addEventListener('input', (event) => {
+		if (!state.cards.length) return;
+		const card = state.cards[state.index];
+		state.levels.set(cardKey(card, state.allCards.indexOf(card)), Number(event.target.value));
+		saveStorage();
+		render();
+	});
+	elements.level?.addEventListener('click', (event) => event.stopPropagation());
 	elements.deckSelect?.addEventListener('change', (event) => {
 		state.deck = event.target.value;
 		applyDeck();
@@ -168,7 +205,15 @@
 		const question = elements.questionInput.value.trim();
 		const answer = elements.answerInput.value.trim();
 		if (!question || !answer) return;
-		const card = { id: `custom-${Date.now()}`, question, answer, deck: state.deck === 'all' ? 'My cards' : state.deck };
+		const card = {
+			id: `custom-${Date.now()}`,
+			question,
+			answer,
+			question_hint: elements.questionHintInput.value.trim(),
+			answer_note: elements.answerNoteInput.value.trim(),
+			know_level: 0,
+			deck: state.deck === 'all' ? 'My cards' : state.deck,
+		};
 		state.allCards.push(card);
 		state.deck = card.deck;
 		updateDeckOptions();

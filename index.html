@@ -30,7 +30,13 @@
         <div id="flashcard" class="flashcard" role="button" tabindex="0" aria-label="Flashcard. Click to reveal answer.">
           <div id="card-label" class="card-label">Question</div>
           <div id="card-content">No cards yet</div>
+          <div id="answer-note" class="answer-note" hidden></div>
           <div id="card-hint" class="hint">Click the card to reveal the answer</div>
+          <label class="level-control" for="know-level">
+            <span>Remembering level</span>
+            <input id="know-level" type="range" min="0" max="2" step="1" value="0" aria-label="Remembering level">
+            <span class="level-label" id="know-level-label">Don't know</span>
+          </label>
         </div>
         <div class="card-actions">
           <button id="previous-btn" class="ghost" type="button">← Previous</button>
@@ -54,6 +60,8 @@
       <form id="card-form">
         <input id="question-input" type="text" placeholder="Question" aria-label="Question" required>
         <input id="answer-input" type="text" placeholder="Answer" aria-label="Answer" required>
+        <input id="question-hint-input" type="text" placeholder="Question hint (optional)" aria-label="Question hint">
+        <textarea id="answer-note-input" rows="2" placeholder="Answer note in Markdown (optional)" aria-label="Answer note"></textarea>
         <button class="primary" type="submit">Add card</button>
       </form>
     </section>

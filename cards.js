@@ -1,14 +1,23 @@
 const cards = [
     {
         question: "火",
-        answer: "fire"
+        question_hint: "ひ",
+        answer: "fire",
+        answer_note: "",
+        know_level: 2
     },
     {
         question: "水",
-        answer: "water"
+        question_hint: "みず",
+        answer: "water",
+        answer_note: "",
+        know_level: 2
     },
     {
         question: "学校",
-        answer: "school"
+        question_hint: "がっこう",
+        answer: "school",
+        answer_note: "",
+        know_level: 2
     }
 ];
