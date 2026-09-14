@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">Flashcard</div>
+    <nav aria-label="Main navigation">
+      <button id="shuffle-btn" class="ghost" type="button">Shuffle</button>
+      <button id="reset-btn" class="ghost" type="button">Reset progress</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div><h1>Study smarter.</h1><p class="muted">Review your cards and build lasting knowledge.</p></div>
+      <div class="toolbar">
+        <label for="deck-select" class="muted">Deck</label>
+        <select id="deck-select" aria-label="Choose a deck"><option value="all">All cards</option></select>
+        <button id="add-deck-btn" class="primary" type="button">+ New deck</button>
+      </div>
+    </section>
+
+    <section class="study" aria-label="Flashcard study area">
+      <div>
+        <div id="flashcard" class="flashcard" role="button" tabindex="0" aria-label="Flashcard. Click to reveal answer.">
+          <div id="card-label" class="card-label">Question</div>
+          <div id="card-content">No cards yet</div>
+          <div id="card-hint" class="hint">Click the card to reveal the answer</div>
+        </div>
+        <div class="card-actions">
+          <button id="previous-btn" class="ghost" type="button">← Previous</button>
+          <button id="flip-btn" class="primary" type="button">Flip card</button>
+          <button id="next-btn" class="ghost" type="button">Next →</button>
+        </div>
+      </div>
+      <aside class="side-panel">
+        <h2>Your progress</h2>
+        <p id="progress-text" class="muted">0 of 0 cards reviewed</p>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="stats">
+          <div class="stat"><strong id="known-count">0</strong><span>Known</span></div>
+          <div class="stat"><strong id="review-count">0</strong><span>To review</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="manage">
+      <h2>Add a flashcard</h2>
+      <form id="card-form">
+        <input id="question-input" type="text" placeholder="Question" aria-label="Question" required>
+        <input id="answer-input" type="text" placeholder="Answer" aria-label="Answer" required>
+        <button class="primary" type="submit">Add card</button>
+      </form>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
